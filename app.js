@@ -12,7 +12,7 @@ config({ path: "./config/config.env" });
 
 app.use(
   cors({
-    origin: ["http://localhost:5174", "http://localhost:5173"],
+    origin: [process.env.FRONTEND_URL, process.env.DASHBOARD_URL],
     methods: ["GET", "POST", "DELETE", "PUT"], // Change 'method' to 'methods'
     credentials: true,
   })
