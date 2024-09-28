@@ -12,11 +12,18 @@ config({ path: "./config/config.env" });
 
 app.use(
   cors({
-    origin: [process.env.FRONTEND_URL, process.env.DASHBOARD_URL],
-    methods: ["GET", "POST", "DELETE", "PUT"], // Change 'method' to 'methods'
+    origin: [process.env.FRONTEND_URL, process.env.DASHBOARD_URL], // Your frontend URLs
+    methods: ["GET", "POST", "DELETE", "PUT"],
     credentials: true,
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Access-Control-Allow-Origin", // Add this header if necessary
+    ],
   })
 );
+
 
 
 app.use(cookieParser());
