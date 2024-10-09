@@ -11,8 +11,7 @@ export const generateToken = (user, message, statusCode, res) => {
       ),
       httpOnly: true,
       secure: true,
-      sameSite: 'None', // Required for cross-origin cookies
-      secure: process.env.NODE_ENV === 'production', // Ensure secure cookies in production
+      sameSite:"None"
     })
     .json({
       success: true,
