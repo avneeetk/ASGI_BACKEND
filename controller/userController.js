@@ -6,21 +6,22 @@ import { generateToken } from "../utils/jwtToken.js";
 // Admin Login with fixed credentials
 export const adminLogin = catchAsyncErrors(async (req, res, next) => {
   const { email, password } = req.body;
-  const adminEmail = process.env.ADMIN_EMAIL;
-  const adminPassword = process.env.ADMIN_PASSWORD;
+  
+  // Fixed admin credentials (hardcoded)
+  const adminEmail = "admin@asgi.com";  // Replace with the actual fixed email
+  const adminPassword = "2024Rdssdf#";   // Replace with the actual fixed password
 
   // Verify admin credentials
   if (email !== adminEmail || password !== adminPassword) {
     return next(new ErrorHandler("Invalid Admin Credentials!", 401));
   }
 
-  // Retrieve admin from the database
+  // Generate token and set cookie
   const user = await User.findOne({ email, role: "Admin" });
   if (!user) {
     return next(new ErrorHandler("Admin Not Found!", 404));
   }
 
-  // Generate token and set cookie
   generateToken(user, "Admin Logged In Successfully!", 200, res);
 });
 
