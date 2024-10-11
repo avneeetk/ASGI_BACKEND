@@ -1,5 +1,8 @@
 import express from "express";
 import {
+  adminLogin,
+  getAllPatients,
+  getUserDetails,
   login,
   logoutAdmin,
   logoutPatient,
@@ -12,10 +15,16 @@ import {
 
 const router = express.Router();
 
-router.post("/patient/register", patientRegister);
-router.post("/login", login);
+// Admin routes
+router.post("/admin/login", adminLogin);
+router.get("/admin/patients", isAdminAuthenticated, getAllPatients);
 router.get("/admin/me", isAdminAuthenticated, getUserDetails);
-router.get("/patient/logout", isPatientAuthenticated, logoutPatient);
 router.get("/admin/logout", isAdminAuthenticated, logoutAdmin);
+
+// Patient routes
+router.post("/patient/register", patientRegister);
+router.post("/patient/login", login);
+router.get("/patient/me", isPatientAuthenticated, getUserDetails);
+router.get("/patient/logout", isPatientAuthenticated, logoutPatient);
 
 export default router;

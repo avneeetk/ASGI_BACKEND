@@ -6,17 +6,14 @@ import { generateToken } from "../utils/jwtToken.js";
 // Admin Login with fixed credentials
 export const adminLogin = catchAsyncErrors(async (req, res, next) => {
   const { email, password } = req.body;
-  
-  // Fixed admin credentials (hardcoded)
-  const adminEmail = "admin@asgi.com";  // Replace with the actual fixed email
-  const adminPassword = "2024Rdssdf#";   // Replace with the actual fixed password
 
-  // Verify admin credentials
+  const adminEmail = "admin@asgi.com";
+  const adminPassword = "2024Rdssdf#";
+
   if (email !== adminEmail || password !== adminPassword) {
     return next(new ErrorHandler("Invalid Admin Credentials!", 401));
   }
 
-  // Generate token and set cookie
   const user = await User.findOne({ email, role: "Admin" });
   if (!user) {
     return next(new ErrorHandler("Admin Not Found!", 404));
@@ -34,7 +31,16 @@ export const getAllPatients = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-// Logout Admin
+// Get details of logged-in user (admin or patient)
+export const getUserDetails = catchAsyncErrors(async (req, res, next) => {
+  const user = req.user;
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+// Admin Logout
 export const logoutAdmin = catchAsyncErrors(async (req, res, next) => {
   res
     .status(201)
@@ -73,7 +79,7 @@ export const patientRegister = catchAsyncErrors(async (req, res, next) => {
     password,
     role: "Patient",
   });
-  
+
   generateToken(user, "User Registered!", 200, res);
 });
 
@@ -93,7 +99,7 @@ export const login = catchAsyncErrors(async (req, res, next) => {
   generateToken(user, "Login Successfully!", 201, res);
 });
 
-// Logout Patient
+// Patient Logout
 export const logoutPatient = catchAsyncErrors(async (req, res, next) => {
   res
     .status(201)
