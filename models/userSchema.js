@@ -1,71 +1,64 @@
-import mongoose from "mongoose";
-import validator from "validator";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-
 const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
-    required: [true, "First Name Is Required!"],
-    minLength: [3, "First Name Must Contain At Least 3 Characters!"],
+    required: [true, "First Name is required!"],
+    minLength: [3, "First Name must contain at least 3 characters!"],
   },
   lastName: {
     type: String,
-    required: [true, "Last Name Is Required!"],
-    minLength: [3, "Last Name Must Contain At Least 3 Characters!"],
+    required: [true, "Last Name is required!"],
+    minLength: [3, "Last Name must contain at least 3 characters!"],
   },
   email: {
     type: String,
-    required: [true, "Email Is Required!"],
-    validate: [validator.isEmail, "Provide A Valid Email!"],
+    required: [true, "Email is required!"],
+    validate: [validator.isEmail, "Provide a valid email!"],
+    unique: true, // Ensure uniqueness
   },
   phone: {
     type: String,
-    required: [true, "Phone Is Required!"],
-    minLength: [10, "Phone Number Must Contain Exact 10 Digits!"],
-    maxLength: [10, "Phone Number Must Contain Exact 10 Digits!"],
+    required: [true, "Phone is required!"],
+    validate: {
+      validator: function (v) {
+        return /^[0-9]{10}$/.test(v); // Ensures exactly 10 digits
+      },
+      message: "Phone number must contain exactly 10 digits!",
+    },
   },
-  
   dob: {
     type: Date,
-    required: [true, "DOB Is Required!"],
+    required: [true, "DOB is required!"],
   },
   gender: {
     type: String,
-    required: [true, "Gender Is Required!"],
-    enum: ["Male", "Female"],
+    required: [true, "Gender is required!"],
+    enum: ["Male", "Female", "Other"], // Optional addition
   },
   password: {
     type: String,
-    required: [true, "Password Is Required!"],
-    minLength: [8, "Password Must Contain At Least 8 Characters!"],
+    required: [true, "Password is required!"],
+    minLength: [8, "Password must contain at least 8 characters!"],
     select: false,
   },
   role: {
     type: String,
-    required: [true, "User Role Required!"],
-    enum: ["Patient", "Doctor", "Admin"],
-  },
-  doctorDepartment:{
-    type: String,
-  },
-  docAvatar: {
-    public_id: String,
-    url: String,
+    required: [true, "User role required!"],
+    enum: ["Patient", "Admin"], // Removed "Doctor"
   },
 });
 
+// Hash password before saving
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
-    next();
-  }
+  if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);
 });
 
+// Compare password method
 userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
+// Generate JWT token
 userSchema.methods.generateJsonWebToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET_KEY, {
     expiresIn: process.env.JWT_EXPIRES,

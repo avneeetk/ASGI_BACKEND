@@ -1,30 +1,116 @@
-import express from "express";
-import {
-  adminLogin,
-  getAllPatients,
-  getUserDetails,
-  login,
-  logoutAdmin,
-  logoutPatient,
-  patientRegister,
-} from "../controller/userController.js";
-import {
-  isAdminAuthenticated,
-  isPatientAuthenticated,
-} from "../middlewares/auth.js";
+import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
+import { User } from "../models/userSchema.js";
+import ErrorHandler from "../middlewares/error.js";
+import { generateToken } from "../utils/jwtToken.js";
 
-const router = express.Router();
+// Admin Login with fixed credentials
+export const adminLogin = catchAsyncErrors(async (req, res, next) => {
+  const { email, password } = req.body;
 
-// Admin routes
-router.post("/admin/login", adminLogin);
-router.get("/admin/patients", isAdminAuthenticated, getAllPatients);
-router.get("/admin/me", isAdminAuthenticated, getUserDetails);
-router.get("/admin/logout", isAdminAuthenticated, logoutAdmin);
+  const adminEmail = "admin@asgi.com";
+  const adminPassword = "2024Rdssdf#";
 
-// Patient routes
-router.post("/patient/register", patientRegister);
-router.post("/patient/login", login);
-router.get("/patient/me", isPatientAuthenticated, getUserDetails);
-router.get("/patient/logout", isPatientAuthenticated, logoutPatient);
+  if (email !== adminEmail || password !== adminPassword) {
+    return next(new ErrorHandler("Invalid Admin Credentials!", 401));
+  }
 
-export default router;
+  const user = await User.findOne({ email, role: "Admin" });
+  if (!user) {
+    return next(new ErrorHandler("Admin Not Found!", 404));
+  }
+
+  generateToken(user, "Admin Logged In Successfully!", 200, res);
+});
+
+// Get all patients for admin
+export const getAllPatients = catchAsyncErrors(async (req, res, next) => {
+  const patients = await User.find({ role: "Patient" });
+  res.status(200).json({
+    success: true,
+    patients,
+  });
+});
+
+// Get details of logged-in user (admin or patient)
+export const getUserDetails = catchAsyncErrors(async (req, res, next) => {
+  const user = req.user;
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+// Admin Logout
+export const logoutAdmin = catchAsyncErrors(async (req, res, next) => {
+  res
+    .status(201)
+    .cookie("adminToken", "", {
+      httpOnly: true,
+      expires: new Date(Date.now()),
+      secure: true,
+      sameSite: "None",
+    })
+    .json({
+      success: true,
+      message: "Admin Logged Out Successfully.",
+    });
+});
+
+// Patient Registration
+export const patientRegister = catchAsyncErrors(async (req, res, next) => {
+  const { firstName, lastName, email, phone, dob, gender, password } = req.body;
+
+  if (!firstName || !lastName || !email || !phone || !dob || !gender || !password) {
+    return next(new ErrorHandler("Please Fill Full Form!", 400));
+  }
+
+  const isRegistered = await User.findOne({ email });
+  if (isRegistered) {
+    return next(new ErrorHandler("User already Registered!", 400));
+  }
+
+  const user = await User.create({
+    firstName,
+    lastName,
+    email,
+    phone,
+    dob,
+    gender,
+    password,
+    role: "Patient",
+  });
+
+  generateToken(user, "User Registered!", 200, res);
+});
+
+// Patient Login
+export const login = catchAsyncErrors(async (req, res, next) => {
+  const { email, password, role } = req.body;
+
+  if (!email || !password || !role) {
+    return next(new ErrorHandler("Please Fill Full Form!", 400));
+  }
+
+  const user = await User.findOne({ email }).select("+password");
+  if (!user || role !== user.role || !(await user.comparePassword(password))) {
+    return next(new ErrorHandler("Invalid Email, Password or Role!", 400));
+  }
+
+  generateToken(user, "Login Successfully!", 201, res);
+});
+
+// Patient Logout
+export const logoutPatient = catchAsyncErrors(async (req, res, next) => {
+  res
+    .status(201)
+    .cookie("patientToken", "", {
+      httpOnly: true,
+      expires: new Date(Date.now()),
+      secure: true,
+      sameSite: "None",
+    })
+    .json({
+      success: true,
+      message: "Patient Logged Out Successfully.",
+    });
+});
