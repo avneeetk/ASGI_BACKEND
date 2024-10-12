@@ -2,15 +2,17 @@ import express from "express";
 import {
   postPatientHistory,
   getAllPatientHistories,
+  exportPatientHistories,
 } from "../controller/historyController.js";
-import { isPatientAuthenticated } from "../middlewares/auth.js"; // Only patient authentication needed
+import { isPatientAuthenticated } from "../middlewares/auth.js"; // Authentication middleware
 
 const router = express.Router();
 
-// POST route for adding patient history
+// Routes for patient history
 router.post("/history", isPatientAuthenticated, postPatientHistory);
-
-// GET route for fetching all patient histories (accessible to all authenticated users)
 router.get("/getall", isPatientAuthenticated, getAllPatientHistories);
+
+// New route to export histories for Excel download
+router.get("/exportHistories", isPatientAuthenticated, exportPatientHistories);
 
 export default router;
