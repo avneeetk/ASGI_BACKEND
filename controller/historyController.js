@@ -46,12 +46,22 @@ export const postPatientHistory = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-// Function to get all patient histories (accessible to all authenticated users)
+// Function to get all patient histories
 export const getAllPatientHistories = catchAsyncErrors(async (req, res, next) => {
   const histories = await PatientHistory.find().populate('patientId', 'firstName lastName email phone dob');
 
   res.status(200).json({
     success: true,
     histories,
+  });
+});
+
+// Function to export patient histories
+export const exportPatientHistories = catchAsyncErrors(async (req, res, next) => {
+  const histories = await PatientHistory.find(); // Fetch all histories
+
+  res.status(200).json({
+    success: true,
+    histories, // Send histories for export
   });
 });
