@@ -4,7 +4,7 @@ import { config } from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { errorMiddleware } from "./middlewares/error.js";
-import {userRouter} from "./router/userRouter.js";
+import userRouter from "./router/userRouter.js";
 import historyRouter from "./router/historyRouter.js";
 
 const app = express();
