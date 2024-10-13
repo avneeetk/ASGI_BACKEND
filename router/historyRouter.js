@@ -1,11 +1,16 @@
+// historyRouter.js
 import express from "express";
-import { exportHistories, postPatientHistory, getAllPatientHistories } from "../controller/historyController.js";
+import { postPatientHistory, getAllPatientHistories, exportHistories } from "../controller/historyController.js";
 
 const router = express.Router();
 
-// Routes for patient history
-router.post("/", postPatientHistory); // To create patient history
-router.get("/", getAllPatientHistories); // To get all patient histories
-router.get("/exportHistories", exportHistories); // To export patient histories as Excel
+// POST request for adding patient history
+router.post("/add", postPatientHistory);
+
+// GET request for fetching all histories
+router.get("/", getAllPatientHistories);
+
+// GET request for exporting histories
+router.get("/exportHistories", exportHistories);
 
 export default router;
