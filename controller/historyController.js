@@ -23,6 +23,11 @@ export const postPatientHistory = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Please fill all required fields", 400));
   }
 
+  // Check if user is authenticated
+  if (!req.user || !req.user._id) {
+    return next(new ErrorHandler("User not authenticated", 401)); // Return error if not authenticated
+  }
+
   const patientId = req.user._id;
 
   // Create a new patient history record
