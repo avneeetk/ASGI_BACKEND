@@ -3,11 +3,6 @@ import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../middlewares/error.js";
 import XLSX from 'xlsx';
 
-// Function to post patient history
-import { PatientHistory } from "../models/historySchema.js";
-import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
-import ErrorHandler from "../middlewares/error.js";
-import XLSX from 'xlsx';
 
 // Function to post patient history
 export const postPatientHistory = catchAsyncErrors(async (req, res, next) => {
