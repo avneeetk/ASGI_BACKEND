@@ -3,7 +3,7 @@ import { catchAsyncErrors } from "./catchAsyncErrors.js";
 import ErrorHandler from "./error.js";
 import jwt from "jsonwebtoken";
 
-// Middleware to authenticate the admin based on static credentials
+// Admin Authentication
 export const isAdminAuthenticated = catchAsyncErrors(async (req, res, next) => {
   const token = req.cookies.adminToken;
   if (!token) {
@@ -13,19 +13,18 @@ export const isAdminAuthenticated = catchAsyncErrors(async (req, res, next) => {
   const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
   req.user = await User.findById(decoded.id);
 
-  // Since the admin is hardcoded, you don't need a role check, just ensure the token is valid
   if (!req.user) {
     return next(new ErrorHandler("Invalid token or user not found", 403));
   }
-  
-  next(); // Continue to the next middleware
+
+  next();
 });
 
-// Middleware to authenticate all users (who are patients)
+// Patient Authentication
 export const isPatientAuthenticated = catchAsyncErrors(async (req, res, next) => {
-  const token = req.cookies.patientToken; // Ensure you are using the correct cookie name
+  const token = req.cookies.patientToken;
   if (!token) {
-    return next(new ErrorHandler("User is not authenticated!", 401)); // Change the error code to 401 for unauthorized
+    return next(new ErrorHandler("User is not authenticated!", 401));
   }
 
   const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
@@ -35,6 +34,5 @@ export const isPatientAuthenticated = catchAsyncErrors(async (req, res, next) =>
     return next(new ErrorHandler("Invalid token or user not found", 403));
   }
 
-  next(); // Proceed if user is authenticated
+  next();
 });
-
