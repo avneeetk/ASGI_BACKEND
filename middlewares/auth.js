@@ -23,9 +23,9 @@ export const isAdminAuthenticated = catchAsyncErrors(async (req, res, next) => {
 
 // Middleware to authenticate all users (who are patients)
 export const isPatientAuthenticated = catchAsyncErrors(async (req, res, next) => {
-  const token = req.cookies.patientToken;
+  const token = req.cookies.patientToken; // Ensure you are using the correct cookie name
   if (!token) {
-    return next(new ErrorHandler("User is not authenticated!", 400));
+    return next(new ErrorHandler("User is not authenticated!", 401)); // Change the error code to 401 for unauthorized
   }
 
   const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
@@ -35,6 +35,6 @@ export const isPatientAuthenticated = catchAsyncErrors(async (req, res, next) =>
     return next(new ErrorHandler("Invalid token or user not found", 403));
   }
 
-  // Proceed as all users are treated as patients
-  next();
+  next(); // Proceed if user is authenticated
 });
+
